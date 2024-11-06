@@ -48,3 +48,32 @@
    ```bash
    git clone https://github.com/your-username/equation-high-low-game.git
    cd equation-high-low-game
+
+
+
+## Currently Working On
+
+This section provides an overview of active development efforts and future improvements planned for the Equation Hi-Lo Game.
+
+### Improvements 
+
+1. **Timer in the Equation Phase**:
+   - Add a 5-minute countdown timer during the equation phase to allow players a fixed amount of time to complete their equations.
+
+2. **Square Root Support in Equations**:
+   - Ensure that square root operations are correctly supported and evaluated within player equations.
+   
+3. **Validation of Equations**:
+   - Implement a check to ensure players only use their valid hidden and open cards in their equations.
+
+4. **Betting Functionality**:
+   - Add betting mechanics with coins, enforce betting rules, and handle coin distribution based on the final results.
+
+5. **Bot Player**:
+   - Create an AI bot that can participate in the game, simulating human players with different strategies.
+
+6. **Improved Interface**:
+   - Enhance the command-line interface for better clarity and ease of use, or consider a GUI for an even more user-friendly experience.
+
+---
+
