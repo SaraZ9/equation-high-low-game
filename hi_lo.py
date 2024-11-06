@@ -149,6 +149,48 @@ def evaluate_equation(equation):
         return None
     return result
 
+def bot_create_equation(hidden_card, open_cards, operation_cards):
+    """Allow bot to create an equation using their cards."""
+    print("\nBot's turn to create an equation!")
+    print(f"Hidden card: {hidden_card}")
+    print(f"Open cards: {open_cards}")
+    print(f"Operation cards: {operation_cards}")
+    # Extract the numbers from the hidden card and open cards
+    numbers = [hidden_card[0]] + [card[0] for card in open_cards]
+
+    # Choose a random number of operations (1 or 2 operations for simplicity)
+    num_operations = random.randint(1, min(len(numbers) - 1, len(operation_cards)))
+    
+    # Select operations randomly from operation_cards
+    selected_operations = random.sample(operation_cards, num_operations)
+    
+    # Randomly shuffle the numbers to create different equation structures
+    random.shuffle(numbers)
+    
+    # Construct the equation string
+    equation = str(numbers[0])
+    for i in range(num_operations):
+        equation += f" {selected_operations[i]} {numbers[i + 1]}"
+    
+    # Handle square root if selected and applicable
+    if '√' in operation_cards:
+        if random.choice([True, False]):  # Randomly decide to apply square root
+            equation = f"math.sqrt({equation})"
+    result = bot_evaluate_equation(equation)
+    return equation, result
+
+def bot_evaluate_equation(equation):
+    """Evaluates the generated equation and returns the result."""
+    # TODO: need to use all operators including √!
+    try:
+        # Ensure that `math` functions like sqrt are available in eval
+        result = eval(equation, {"math": math})
+    except (SyntaxError, ZeroDivisionError, ValueError, NameError):
+        return None  # In case of invalid equations or math errors
+        print("\nError when bot_evaluate_equation");
+    return result
+
+
 
 def determine_winners(players, high_low):
     """Determine the winning players for high or low bets based on equation results."""
@@ -157,29 +199,19 @@ def determine_winners(players, high_low):
 
     for player in players:
         if player == "Bot":
-            
-            # bot automatically creates equation with its hidden card, open cards, and operation cards
-            hidden_card = players[player]['hidden_card'] 
-            open_cards = players[player]['open_cards'] 
-            operation_cards = players[player]['operation_cards'] 
-            
-            # Example: Create an equation using the cards
-            # This is a simple example and may need to be adjusted based on your game's rules
-            equation = f"{hidden_card} "
-            for i, card in enumerate(open_cards):
-                equation += f"{operation_cards[i]} {card} "
-                        
-            result = evaluate_equation(equation)
-            
-            print(f"Bot {player.name} created equation: {equation} = {result}")
+            equation, result = bot_create_equation(players[player]['hidden_card'], players[player]['open_cards'], players[player]['operation_cards']);
+            print("\nEquation is " + equation);
+
         else:
             equation, result = create_equation(players[player]['hidden_card'], players[player]['open_cards'], players[player]['operation_cards'])
-            if high_low[player] == "high":
-                high_bets[player] = result
-                print(f"{player}'s result is {result}") 
-            elif high_low[player] == "low":
-                low_bets[player] = result
-                print(f"{player}'s result is {result}")
+            print("\nEquation is " + equation);
+
+        if high_low[player] == "high":
+            high_bets[player] = result
+            print(f"{player}'s result is {result}") 
+        elif high_low[player] == "low":
+            low_bets[player] = result
+            print(f"{player}'s result is {result}")
 
     high_winner, low_winner = None, None
     
