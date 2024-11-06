@@ -1,6 +1,8 @@
 import random
 import math
 import time
+import threading
+import sys
 
 # Define deck with cards (numeric cards with types and operation cards)
 numeric_cards = [(n, t) for n in range(11) for t in ["gold", "silver", "bronze", "dirt"]]  # Cards 0-10 with types
@@ -139,19 +141,46 @@ def determine_winners(players, high_low):
 
     return high_winner, low_winner
 
-
 def work_on_equations():
     """Provide a 5-minute timer with an option to end early."""
     print("\nYou have 5 minutes to work on your equations! If you're ready sooner, type 'ready' to proceed.")
+    print("Type 'ready' and press Enter when done.")  # One-time message to prompt input
+    
+    # Function to listen for 'ready' input
+    def check_input():
+        while True:
+            user_input = input()
+            if user_input.lower() == 'ready':
+                print("\nProceeding early as requested.")
+                break
+    
+    input_thread = threading.Thread(target=check_input)
+    input_thread.start()
+    
+    # Start timer loop
     start_time = time.time()
     while True:
         elapsed_time = time.time() - start_time
+        remaining_time = 300 - elapsed_time
+        minutes, seconds = divmod(remaining_time, 60)
+        time_format = f"{int(minutes):02}:{int(seconds):02}"
+        
+        # Display the countdown on a single line
+        sys.stdout.write(f"\rTime remaining: {time_format}   ")  # Extra spaces to clear remnants
+        sys.stdout.flush()
+        time.sleep(1)
+        
+        # Break on timeout or early input
         if elapsed_time >= 300:
-            print("Time's up!")
+            print("\nTime's up!")
             break
-        if input("Type 'ready' if you want to end early: ").strip().lower() == "ready":
+        if not input_thread.is_alive():
             break
-        print(f"{int(300 - elapsed_time)} seconds remaining...")
+    
+    input_thread.join()
+    # Clear the timer line
+    sys.stdout.write("\r" + " " * 30 + "\r")  # Overwrite with spaces and reset the cursor
+    sys.stdout.flush()
 
 def play_game():
     """Main function to start and control the game flow."""
