@@ -28,6 +28,7 @@ def deal_card():
 
 def initial_setup():
     """Set up the game: define players and assign each a hidden card."""
+    ''' allow to choose to add a bot player'''
     while True:
         try:
             player_count = int(input("Enter the number of players: "))
@@ -40,13 +41,22 @@ def initial_setup():
 
     players = {f"Player {i+1}": {'hidden_card': None, 'open_cards': [], 'operation_cards': ['+', '-', '/']} for i in range(player_count)}
     
+    # Option to add a bot player
+    add_bot = input("Would you like to add a bot player? (yes/no): ").strip().lower()
+    if add_bot == 'yes':
+        players["Bot"] = {'hidden_card': None, 'open_cards': [], 'operation_cards': ['+', '-', '/']}
+    
     # Deal hidden cards to each player with instructions for viewing them individually
     for player in players:
-        input(f"{player}, please ensure only you are looking at the screen. Press Enter when ready to see your hidden card.")
-        players[player]['hidden_card'] = deal_hidden_card()
-        print(f"{player}, your hidden card is: {players[player]['hidden_card']}")
-        input("Memorize your hidden card. Press Enter when ready to clear the screen for the next player.")
-        print("\033[H\033[J")  # Clear screen (works in most terminals)
+        if player == "Bot":
+            players[player]['hidden_card'] = deal_hidden_card()
+            print(f"{player}'s hidden card is: {players[player]['hidden_card']}")
+        else:
+            input(f"{player}, please ensure only you are looking at the screen. Press Enter when ready to see your hidden card.")
+            players[player]['hidden_card'] = deal_hidden_card()
+            print(f"{player}, your hidden card is: {players[player]['hidden_card']}")
+            input("Memorize your hidden card. Press Enter when ready to clear the screen for the next player.")
+            print("\033[H\033[J")  # Clear screen (works in most terminals)
     
     return players
 
@@ -71,6 +81,47 @@ def deal_round_card_with_rules(player, player_data):
             print(f"{player} received {card}.")
             player_data['open_cards'].append(card)
             break
+
+def bot_controlled_player():
+    '''
+    
+    '''
+    
+
+def players ():
+    
+        '''
+        Defines the players in the game
+        allows players to add their names
+        '''
+    
+
+def chips():
+    '''
+    Defines and tracks the chips for each player
+    '''
+
+def bet_system():    
+    '''
+    Makes the bet system optional (turn it on or off)    
+    Defines a initial bet
+    Allow players to place bets during rounds 2 and 3.
+    Players can pass, raise, or fold.
+    If a player passes, the bet remains
+    If a player raises a bet, The other player needs to raise the bet to continue or fold.
+    If a player folds, the other player wins the round.
+
+    example:
+    before round 1, player 1 and 2 place entry bet of 1 chip (2 chips total)
+    after round 2, player 1 places a bet of 2 chips (4 chips total)
+    player 2 can fold, pass, or raise
+    if player 2 folds, player 1 wins 4 chips
+    if player 2 raises, player 1 needs to raise the bet to continue or fold.
+    if player 1 folds, player 2 wins 4 + raise chips    
+    '''
+    
+
+
 
 def create_equation(hidden_card, open_cards, operation_cards):
     """Allow players to create an equation using their cards."""
@@ -98,18 +149,6 @@ def evaluate_equation(equation):
         return None
     return result
 
-# def evaluate_equation(equation):
-#     """Evaluates the player's equation and returns the result."""
-#     # Replace the square root symbol with the correct math.sqrt function
-#     equation = equation.replace("√", "math.sqrt")
-    
-#     try:
-#         # Pass math in globals to allow use of math functions in eval
-#         result = eval(equation, {"math": math})
-#     except (SyntaxError, ZeroDivisionError, NameError) as e:
-#         return None
-#     return result
-
 
 def determine_winners(players, high_low):
     """Determine the winning players for high or low bets based on equation results."""
@@ -117,13 +156,30 @@ def determine_winners(players, high_low):
     low_bets = {}
 
     for player in players:
-        equation, result = create_equation(players[player]['hidden_card'], players[player]['open_cards'], players[player]['operation_cards'])
-        if high_low[player] == "high":
-            high_bets[player] = result
-            print(f"{player}'s result is {result}")
-        elif high_low[player] == "low":
-            low_bets[player] = result
-            print(f"{player}'s result is {result}")
+        if player == "Bot":
+            
+            # bot automatically creates equation with its hidden card, open cards, and operation cards
+            hidden_card = players[player]['hidden_card'] 
+            open_cards = players[player]['open_cards'] 
+            operation_cards = players[player]['operation_cards'] 
+            
+            # Example: Create an equation using the cards
+            # This is a simple example and may need to be adjusted based on your game's rules
+            equation = f"{hidden_card} "
+            for i, card in enumerate(open_cards):
+                equation += f"{operation_cards[i]} {card} "
+                        
+            result = evaluate_equation(equation)
+            
+            print(f"Bot {player.name} created equation: {equation} = {result}")
+        else:
+            equation, result = create_equation(players[player]['hidden_card'], players[player]['open_cards'], players[player]['operation_cards'])
+            if high_low[player] == "high":
+                high_bets[player] = result
+                print(f"{player}'s result is {result}") 
+            elif high_low[player] == "low":
+                low_bets[player] = result
+                print(f"{player}'s result is {result}")
 
     high_winner, low_winner = None, None
     
@@ -209,12 +265,16 @@ def play_game():
     # Determine high/low bets
     high_low = {}
     for player in players:
-        while True:
-            bet = input(f"{player}, are you betting 'high' or 'low'?: ").lower()
-            if bet in ["high", "low"]:
-                high_low[player] = bet
-                break
-            print("Invalid choice. Please enter 'high' or 'low'.")
+        if player == "Bot":
+            high_low[player] = random.choice(["high", "low"])
+            print(f"{player} is betting {high_low[player]}.")
+        else:
+            while True:
+                bet = input(f"{player}, are you betting 'high' or 'low'?: ").lower()
+                if bet in ["high", "low"]:
+                    high_low[player] = bet
+                    break
+                print("Invalid choice. Please enter 'high' or 'low'.")
 
     # Determine winners
     high_winner, low_winner = determine_winners(players, high_low)
@@ -228,6 +288,8 @@ def play_game():
         print(f"{low_winner} wins the low bet closest to 1.")
     else:
         print("No low bet winner.")
+
+    print("Game over! Thanks for playing Equation Hi-Lo!")
 
 # Start the game
 if __name__ == "__main__":
