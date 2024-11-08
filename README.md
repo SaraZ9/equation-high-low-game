@@ -50,7 +50,7 @@
    cd equation-high-low-game
 
 2. Run the game
-```python main_game.py```
+```python hi_lo.py```
 
 3. Select Players and Start Game:
 You can follow the instruction on the terminal to add human players, bots, or a combination of both.
