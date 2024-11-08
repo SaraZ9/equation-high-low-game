@@ -1,8 +1,10 @@
 # bots/template_bot.py
 
 '''
-THE ORIGINAL APPLIES DIFFERENT STRICTNESS LEVELS TO THE TARGET VALUE, STILL NO BETTER THAN RANDOM
+GABE1 APPLIES RANDOM CALCULATIONS INSTEAD OF GIVING UP WHEN THE EQUATION IS TOO FAR FROM THE TARGET VALUE.
 '''
+
+
 
 import math
 import random
@@ -213,12 +215,64 @@ def make_a_bet_and_equation(bot_data, strictness=None, depth=0, max_depth=100):
             print("Recalculating equation...")
             if not sqrt_needed:
                 # equation won't have square root, so nothing will change if we run the function again
-                print("Oops, without square root I can't do much.")
-                return bet, equation
+                for i in range(1,500):
+                    random_bet, random_equation = random_try(bot_data)
+                    random_result = evaluate_equation(random_equation)
+                    if random_result is not None:
+                        random_dist = abs(20 - random_result) if random_bet == 'high' else abs(1 - random_result)
+                        our_dist = abs(20 - result) if bet == 'high' else abs(1 - result)
+                        if random_dist < our_dist:
+                            equation = random_equation
+                            result = random_result
+                            bet = random_bet
+                        return bet, equation
+                
             else:    
                 return make_a_bet_and_equation(bot_data, strictness, depth + 1, max_depth)
 
     return bet, equation
+
+def random_try(bot_data):
+    """Returns the bot's random bet and an equation using all its cards exactly once."""
+    hidden_card = bot_data['hidden_card']
+    open_cards = bot_data['open_cards']
+    operation_cards = [op for op in bot_data['operation_cards'] if op != '√']
+    
+    # Randomly choose "high" or "low" bet
+    bet = random.choice(["high", "low"])
+
+    # Gather all numbers from hidden and open cards
+    numbers = [hidden_card[0]] + [card[0] for card in open_cards]
+    
+    # Shuffle numbers and operations to ensure randomness in the equation structure
+    random.shuffle(numbers)
+    random.shuffle(operation_cards)
+
+    # Construct the base equation without the square root
+    equation_parts = [str(numbers[0])]
+    for op, num in zip(operation_cards, numbers[1:]):
+        equation_parts.append(op)
+        equation_parts.append(str(num))
+    
+    # Join parts to form the base equation
+    equation_str = " ".join(equation_parts)
+    
+    # Randomly insert 'v' for square root in front of one number if '√' was in operation cards
+    if '√' in bot_data['operation_cards']:
+        # Split equation into parts for modification
+        equation_elements = equation_str.split(" ")
+        
+        # Choose a random index corresponding to a number
+        num_indices = [i for i, elem in enumerate(equation_elements) if elem.isdigit()]
+        if num_indices:
+            sqrt_index = random.choice(num_indices)
+            equation_elements[sqrt_index] = f"v {equation_elements[sqrt_index]}"
+        
+        # Rejoin the elements to form the final equation
+        equation_str = " ".join(equation_elements)
+
+    return bet, equation_str
+
 
 def evaluate_equation(equation):
     """Evaluates the generated equation and returns the result."""

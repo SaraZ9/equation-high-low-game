@@ -7,15 +7,16 @@ import itertools
 import importlib
 import os
 import re
+# record for the plot
+# create global variables for the game record, give options to choose the number of bots and games
+# Global variables for game record
+game_record = []
+num_bots_gabe = 1
+num_bots_smart = 1
 
-# Define deck with cards (numeric cards with types and operation cards)
-numeric_cards = [(n, t) for n in range(11) for t in ["gold", "silver", "bronze", "dirt"]]  # Cards 0-10 with types
-operation_cards = ['*', '√'] * 4  # 4 of each operation card
+num_games = 5000
 
-# Shuffle the deck
-deck = numeric_cards + operation_cards
-random.shuffle(deck)
-print("Deck initialized with", len(deck), "cards")  # Debug message
+
 
 # bots and players set up
 bots = {}
@@ -65,20 +66,6 @@ def initial_setup():
     """Set up the game: define players and assign each a hidden card."""
     game_msg("WELCOME TO EQUATION HI-LO SETUP")
     
-    # Get number of human players
-    while True:
-        try:
-            player_count = int(input("Enter the number of human players: "))
-            # if player_count < 1:
-            #     print("There must be at least 1 human player.")
-            #     continue
-            break
-        except ValueError:
-            print("Invalid input. Please enter a number.")
-
-    # Initialize human players
-    players = {f"Player {i+1}": {'hidden_card': None, 'open_cards': [], 'operation_cards': ['+', '-', '/'], 'high_low_bet' : None, "equation": None} for i in range(player_count)}
-    
     # Load available bots from the bots directory
     bots = load_bots()
     
@@ -96,10 +83,11 @@ def initial_setup():
     game_msg("BOT SELECTION")
     # Prompt for bot quantities
     bot_counts = {}
-    for bot_name in bots.keys():
+    # for bot_name in bots.keys():
+    for bot_name in ["gabe1_bot", "gabe2_bot", "smart_bot", "random_bot"]:
         while True:
             try:
-                count = int(input(f"How many {bot_name} bots would you like to add? (Enter 0 for none): "))
+                count = 1
                 if count < 0:
                     print("Please enter a positive number.")
                 else:
@@ -130,10 +118,10 @@ def deal_hidden_card():
             players[player]['hidden_card'] = deal_number_card()
             print(f"{player}'s hidden card is: HIDDEN")
         else:
-            input(f"{player}, please ensure only you are looking at the screen. Press Enter when ready to see your hidden card.")
+            # input(f"{player}, please ensure only you are looking at the screen. Press Enter when ready to see your hidden card.")
             players[player]['hidden_card'] = deal_number_card()
             print(f"{player}, your hidden card is: {players[player]['hidden_card']}")
-            input("Memorize your hidden card. Press Enter when ready to clear the screen for the next player.")
+            #input("Memorize your hidden card. Press Enter when ready to clear the screen for the next player.")
             print("\033[H\033[J")  # Clear screen (works in most terminals)
 
 
@@ -239,7 +227,7 @@ def player_create_equation(player):
     all_operations = operation_cards.copy()
 
     while True:
-        equation = input("Enter your equation: ")
+        #equation = input("Enter your equation: ")
         players[player]["equation"] = equation
 
         # Check if all numbers are used exactly once
@@ -340,7 +328,7 @@ def determine_winners():
 def player_betting_round():
     """Let each player place high or low bets."""
     game_msg("BETTING ROUND")
-    input("\nPlease place your bet coins on the table now. Press Enter when all players finish.")
+    #input("\nPlease place your bet coins on the table now. Press Enter when all players finish.")
 
 
     for player in players:
@@ -360,9 +348,9 @@ def deal_round(players, round_number):
     
     for player in players:
         deal_round_card_with_rules(player, players[player])
-    if round_number == 2:
-        input("\nPlease place your bet coins on the table now.")
-    input("\nPress Enter to proceed to the next round.")
+    #if round_number == 2:
+        #input("\nPlease place your bet coins on the table now.")
+    #input("\nPress Enter to proceed to the next round.")
 
 def bots_work_on_equations_and_bet():
     for player in players:
@@ -385,8 +373,8 @@ def player_work_on_equations():
         return
     else:
 
-        print("\nYou have 5 minutes to work on your equations! If you're ready sooner, type 'ready' to proceed.")
-        print("Type 'ready' and press Enter when done.")
+        #print("\nYou have 5 minutes to work on your equations! If you're ready sooner, type 'ready' to proceed.")
+        #print("Type 'ready' and press Enter when done.")
         
         # Function to listen for 'ready' input
         def check_input():
@@ -432,6 +420,8 @@ def determine_and_announce_winners():
 
     high_winner, low_winner = determine_winners()
     
+    record_winner(high_winner, low_winner)
+
     game_msg("ANNOUNCE WINNERS")
     if high_winner:
         print(f"{high_winner} wins the high bet closest to 20.")
@@ -443,9 +433,28 @@ def determine_and_announce_winners():
     else:
         print("No low bet winner.")
 
+def record_winner(high_winner, low_winner):
+    """Record the winners for the current game."""
+    # check if all players bet on the same thing
+#    if all(players[player]["high_low_bet"] == "high" for player in players):
+#        game_record.append((high_winner, low_winner))
+#    if all(players[player]["high_low_bet"] == "low" for player in players):
+#        game_record.append((high_winner, low_winner))
+    game_record.append((high_winner, low_winner))
+
 
 # Main function to control the game flow
 def play_game():
+    global deck
+    deck = []
+    # Define deck with cards (numeric cards with types and operation cards)
+    numeric_cards = [(n, t) for n in range(11) for t in ["gold", "silver", "bronze", "dirt"]]  # Cards 0-10 with types
+    operation_cards = ['*', '√'] * 4  # 4 of each operation card
+
+    # Shuffle the deck
+    deck = numeric_cards + operation_cards
+    random.shuffle(deck)
+    print("Deck initialized with", len(deck), "cards")  # Debug message
     """Main function to control the game flow."""
     initial_setup()
     # print("Players set up:", players)
@@ -476,6 +485,40 @@ def play_game():
     
     game_msg("GAME OVER. Thank you for playing Equation Hi-Lo!")
 
+def count_winners():
+    """Count the number of wins for each player in the game record."""
+    # Flatten the game record and count the wins for each player, in the format of high_win_count, low_win_count for each player
+    win_counts = {}
+    for high_winner, low_winner in game_record:
+        if high_winner:
+            win_counts[high_winner] = win_counts.get(high_winner, (0, 0))
+            win_counts[high_winner] = (win_counts[high_winner][0] + 1, win_counts[high_winner][1])
+        if low_winner:
+            win_counts[low_winner] = win_counts.get(low_winner, (0, 0))
+            win_counts[low_winner] = (win_counts[low_winner][0], win_counts[low_winner][1] + 1)
+
+    return win_counts
+    
+
+
 if __name__ == "__main__":
+    
     print("Welcome to Equation Hi-Lo!")
-    play_game()
+    for i in range(num_games):
+        play_game()
+        print(f"\n\nGame {i+1}")
+    win_counts = count_winners()
+    print(win_counts)
+    # plot count winners
+    import matplotlib.pyplot as plt
+
+    plt.figure(figsize=(10, 6))
+    plt.bar(win_counts.keys(), [count[0] for count in win_counts.values()], color='b', label='High Wins')
+    plt.bar(win_counts.keys(), [count[1] for count in win_counts.values()], color='r', label='Low Wins', bottom=[count[0] for count in win_counts.values()])
+    plt.xlabel('Players')
+    plt.ylabel('Wins')
+    plt.title('Wins by Player')
+    plt.legend()
+    plt.show()
+
+

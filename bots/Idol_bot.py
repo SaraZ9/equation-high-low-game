@@ -1,7 +1,7 @@
 # bots/template_bot.py
 
 '''
-THE ORIGINAL APPLIES DIFFERENT STRICTNESS LEVELS TO THE TARGET VALUE, STILL NO BETTER THAN RANDOM
+GABE1 APPLIES DIFFERENT STRICTNESS LEVELS TO THE TARGET VALUE, STILL NO BETTER THAN RANDOM
 '''
 
 import math
@@ -78,7 +78,8 @@ def make_a_bet_and_equation(bot_data, strictness=None, depth=0, max_depth=100):
     tuple: A tuple with the bet ('high' or 'low') and the constructed equation (str).
     """
     import random
-    strictness = random.randint(1, 10)
+    strictness_low = 1.333
+    strictness_high = 6.666
     print(f"Gabe is calculating with a strictness of ", strictness)
     if depth >= max_depth:
         print("Gabe is exhausted!")
@@ -209,7 +210,7 @@ def make_a_bet_and_equation(bot_data, strictness=None, depth=0, max_depth=100):
 
 
         # If the result the value is too far from the target, recalculate the equation
-        if (bet == 'high' and distance_from_20 > strictness) or (bet == 'low' and distance_from_1 > strictness):
+        if (bet == 'high' and distance_from_20 > strictness_high) or (bet == 'low' and distance_from_1 > strictness_low):
             print("Recalculating equation...")
             if not sqrt_needed:
                 # equation won't have square root, so nothing will change if we run the function again
