@@ -50,10 +50,9 @@
    cd equation-high-low-game
 
 2. Run the game
-  ```bash
-  python main_game.py
+```python main_game.py```
 
-3. Select Players:
+3. Select Players and Start Game:
 You can follow the instruction on the terminal to add human players, bots, or a combination of both.
 
 ## Adding Custom Bots
@@ -61,7 +60,7 @@ You can follow the instruction on the terminal to add human players, bots, or a 
 Would you like to add your own custom bot to Equation Hi-Lo? It’s easy to create a bot that can automatically make decisions and compete with other players.
 
 ### Use the Template:
-1. Start by copying `template_bot.py`, which provides the basic structure for creating a bot. Save your new bot file in the `/bots` folder.
+Start by copying `template_bot.py`, which provides the basic structure for creating a bot. Save your new bot file in the `/bots` folder.
 
 ### Implement Core Functions
 Each bot requires three core functions:
@@ -71,8 +70,8 @@ Each bot requires three core functions:
 - **`decision_for_drop(bot_data)`**: Defines which operation to drop if the bot receives a `*` card. The `bot_data` dictionary provides the bot's current state, including available operations.
 
 - **`make_a_bet_and_equation(bot_data)`**: The main function where your bot will:
-  - Choose a bet (`high` or `low`), aiming to get closest to a target like 20 (high) or 1 (low).
-  - Form an equation using all number and operation cards exactly once, placing `v` in front of a number to indicate square root if needed. Separate each number and operator with a space.
+  - Choose a bet (`high` or `low`).
+  - Form an equation using all number and operation cards exactly once.
 
 
 ## Future Improvement
