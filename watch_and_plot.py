@@ -7,22 +7,20 @@ import itertools
 import importlib
 import os
 import re
-import coin_system
+# record for the plot
+# create global variables for the game record, give options to choose the number of bots and games
+# Global variables for game record
+game_record = []
+num_bots_gabe = 1
+num_bots_smart = 1
 
-# Define deck with cards (numeric cards with types and operation cards)
-numeric_cards = [(n, t) for n in range(11) for t in ["gold", "silver", "bronze", "dirt"]]  # Cards 0-10 with types
-operation_cards = ['*', '√'] * 4  # 4 of each operation card
+num_games = 5000
 
-# Shuffle the deck
-deck = numeric_cards + operation_cards
-random.shuffle(deck)
-print("Deck initialized with", len(deck), "cards")  # Debug message
+
 
 # bots and players set up
 bots = {}
 players = {}
-coin_record = {}
-coin_system_mode = False
 
 def load_bots():
     """Dynamically load all bot modules from the bots/ directory."""
@@ -30,27 +28,17 @@ def load_bots():
     game_msg("LOADING BOTS")
     bots_dir = "bots"
     for filename in os.listdir(bots_dir):
-        if filename.endswith(".py") and filename != "template_bot.py" and filename != "template_bot_bet.py":  # Exclude template_bot:
+        if filename.endswith(".py") and filename != "template_bot.py":  # Exclude template_bot:
             module_name = filename[:-3]
             module_path = f"bots.{module_name}"
             bot_module = importlib.import_module(module_path)
             
-            if coin_system_mode:
-                # Check if the bot module has all required functions
-                if all(hasattr(bot_module, func) for func in ['welcome_msg', 'decision_for_drop', 'make_a_bet_and_equation', 'first_betting', 'second_betting']):
-                    bots[module_name] = bot_module
-                    print(f"Loaded bot: {module_name}")
-                else:
-                    print(f"Bot {module_name} is missing required functions and was not loaded.")
+            # Check if the bot module has all required functions
+            if all(hasattr(bot_module, func) for func in ['welcome_msg', 'decision_for_drop', 'make_a_bet_and_equation']):
+                bots[module_name] = bot_module
+                print(f"Loaded bot: {module_name}")
             else:
-                # Check if the bot module has all required functions
-                if all(hasattr(bot_module, func) for func in ['welcome_msg', 'decision_for_drop', 'make_a_bet_and_equation']):
-                    bots[module_name] = bot_module
-                    print(f"Loaded bot: {module_name}")
-                else:
-                    print(f"Bot {module_name} is missing required functions and was not loaded.")
-    
-    
+                print(f"Bot {module_name} is missing required functions and was not loaded.")
     return bots
 
 
@@ -72,48 +60,21 @@ def game_msg(msg):
     print("\n" + "=" * 30)
     print(msg)
     print("=" * 30)
-
-def init_coin_system(players):
-    game_msg("Enabling Coin System")
-    global coin_record
-    coin_record = coin_system.enable_coin_system(players)
-    coin_system.print_coins(coin_record)
-
-
+     
 def initial_setup():
     global players, bots 
     """Set up the game: define players and assign each a hidden card."""
     game_msg("WELCOME TO EQUATION HI-LO SETUP")
     
-
-    # Choose game mode: enable coin system or not
-    while True:
-        enable_coin_system = input("Do you want to enable coin system? (Y for Yes / N for No) ").strip().upper()
-        if enable_coin_system in ["Y", "N"]:
-            global coin_system_mode
-            coin_system_mode = enable_coin_system == "Y"  # True if "Y", False if "N"
-            break
-        else:
-            print("Invalid input. Please enter 'Y' or 'N'.")
-
-    # Get number of human players
-    while True:
-        try:
-            player_count = int(input("Enter the number of human players: "))
-            # if player_count < 1:
-            #     print("There must be at least 1 human player.")
-            #     continue
-            break
-        except ValueError:
-            print("Invalid input. Please enter a number.")
-
-    # Initialize human players
-    players = {f"Player {i+1}": {'hidden_card': None, 'open_cards': [], 'operation_cards': ['+', '-', '/'], 'high_low_bet' : None, "equation": None} for i in range(player_count)}
-    
     # Load available bots from the bots directory
     bots = load_bots()
     
     print("Available bot types:")
+
+    # Display available bots
+    # for i, bot_name in enumerate(bots.keys(), 1):
+    #     print(f"{i}. {bot_name}")
+    #     print(f"{bot_name}: {bot_module.welcome_msg()}")
 
     for i, (bot_name, bot_module) in enumerate(bots.items(), 1):
         welcome_message = bot_module.welcome_msg()  # Call the welcome_msg function
@@ -122,10 +83,11 @@ def initial_setup():
     game_msg("BOT SELECTION")
     # Prompt for bot quantities
     bot_counts = {}
-    for bot_name in bots.keys():
+    # for bot_name in bots.keys():
+    for bot_name in ["gabe1_bot", "gabe2_bot", "smart_bot", "random_bot"]:
         while True:
             try:
-                count = int(input(f"How many {bot_name} bots would you like to add? (Enter 0 for none): "))
+                count = 1
                 if count < 0:
                     print("Please enter a positive number.")
                 else:
@@ -147,12 +109,6 @@ def initial_setup():
                 'bot_type': bot_name
             }
 
-    # if enable coin system, enable it now after all players are set
-    if enable_coin_system:
-        init_coin_system(players)
-
-
-
 def deal_hidden_card():
     # Deal hidden cards to each player
     game_msg("DEALING HIDDEN CARDS")
@@ -162,10 +118,10 @@ def deal_hidden_card():
             players[player]['hidden_card'] = deal_number_card()
             print(f"{player}'s hidden card is: HIDDEN")
         else:
-            input(f"{player}, please ensure only you are looking at the screen. Press Enter when ready to see your hidden card.")
+            # input(f"{player}, please ensure only you are looking at the screen. Press Enter when ready to see your hidden card.")
             players[player]['hidden_card'] = deal_number_card()
             print(f"{player}, your hidden card is: {players[player]['hidden_card']}")
-            input("Memorize your hidden card. Press Enter when ready to clear the screen for the next player.")
+            #input("Memorize your hidden card. Press Enter when ready to clear the screen for the next player.")
             print("\033[H\033[J")  # Clear screen (works in most terminals)
 
 
@@ -271,7 +227,7 @@ def player_create_equation(player):
     all_operations = operation_cards.copy()
 
     while True:
-        equation = input("Enter your equation: ")
+        #equation = input("Enter your equation: ")
         players[player]["equation"] = equation
 
         # Check if all numbers are used exactly once
@@ -372,7 +328,7 @@ def determine_winners():
 def player_betting_round():
     """Let each player place high or low bets."""
     game_msg("BETTING ROUND")
-    input("\nPlease place your bet coins on the table now. Press Enter when all players finish.")
+    #input("\nPlease place your bet coins on the table now. Press Enter when all players finish.")
 
 
     for player in players:
@@ -385,92 +341,16 @@ def player_betting_round():
                 print("Invalid choice. Please enter 'high' or 'low'.")
         else:
             print(f"{player} bet on {players[player]['high_low_bet']}.")
-            
-import coin_system
 
-# def first_betting_round():
-#     bet_placed = False
-#     current_bet = 0  # Tracks the current bet to be matched by others
+def deal_round(players, round_number):
+    """Deal cards to each player for a specific round."""
+    print(f"\n======== Dealing Round {round_number} ========")
     
-#     for player in players:
-#         possible_choices = coin_system.calculate_possible_choices(players[player], bet_placed, current_bet)
-        
-#         # Check if player is a bot or a human
-#         if 'bot_type' in players[player]:
-#             # Call the bot's betting function from coin_system
-#             bot_data = players[player]
-#             bot_type = players[player]['bot_type']
-#             bot_module = bots.get(bot_type)
-#             bot_choice = bot_module.first_betting(bot_data, coin_record, possible_choices)
-            
-#             print(f"{player} has made their move: {bot_choice}.")
-
-#             if bot_choice == "raise":
-#                 current_bet = player['coins']  # Update the current bet if bot raised
-#                 bet_placed = True
-#         else:
-#             # Display choices to the human player
-#             print(f"\n{player}, you have {coin_record[player]} coins.")
-#             print(f"Current bet is {current_bet}. Your options: {', '.join(possible_choices)}")
-            
-#             # Get player's decision
-#             while True:
-#                 decision = input(f"{player}, what do you want to do? ").strip().lower()
-                
-#                 if decision not in possible_choices:
-#                     print("Invalid choice. Please choose from the available options.")
-#                     continue
-                
-#                 if decision == "fold":
-#                     print(f"{player} has folded.")
-#                     player['in_game'] = False  # Mark player as out of the game
-#                     break
-                
-#                 elif decision == "pass":
-#                     print(f"{player} has passed.")
-#                     break
-                
-#                 elif decision == "match":
-#                     if coin_system.handle_bet(player, current_bet):
-#                         print(f"{player} has matched the bet of {current_bet} coins.")
-#                     else:
-#                         print("Insufficient coins to match.")
-#                     break
-                
-#                 elif decision == "raise":
-#                     while True:
-#                         try:
-#                             raise_amount = int(input("Enter the amount to raise (must exceed current bet): "))
-#                             if raise_amount <= current_bet or raise_amount > player['coins']:
-#                                 print("Raise must be more than the current bet and within your coin limit.")
-#                             else:
-#                                 current_bet = raise_amount
-#                                 if coin_system.handle_bet(player, current_bet):
-#                                     print(f"{player} has raised the bet to {current_bet} coins.")
-#                                     bet_placed = True
-#                                     break
-#                                 else:
-#                                     print("Insufficient coins for raise.")
-#                         except ValueError:
-#                             print("Invalid input. Please enter a number.")
-#                     break
-    
-#     print("\nBetting round completed.")
-
-
-# def deal_round(players, round_number):
-#     """Deal cards to each player for a specific round."""
-#     print(f"\n======== Dealing Round {round_number} ========")
-    
-#     for player in players:
-#         deal_round_card_with_rules(player, players[player])
-#     if round_number == 2:
-#         if coin_system_mode:
-#             input("\nFirst betting round is going to start...")
-#             first_betting_round()
-#         else:
-#             input("\nPlease place your bet coins on the table now.")
-#     input("\nPress Enter to proceed to the next round.")
+    for player in players:
+        deal_round_card_with_rules(player, players[player])
+    #if round_number == 2:
+        #input("\nPlease place your bet coins on the table now.")
+    #input("\nPress Enter to proceed to the next round.")
 
 def bots_work_on_equations_and_bet():
     for player in players:
@@ -493,8 +373,8 @@ def player_work_on_equations():
         return
     else:
 
-        print("\nYou have 5 minutes to work on your equations! If you're ready sooner, type 'ready' to proceed.")
-        print("Type 'ready' and press Enter when done.")
+        #print("\nYou have 5 minutes to work on your equations! If you're ready sooner, type 'ready' to proceed.")
+        #print("Type 'ready' and press Enter when done.")
         
         # Function to listen for 'ready' input
         def check_input():
@@ -540,6 +420,8 @@ def determine_and_announce_winners():
 
     high_winner, low_winner = determine_winners()
     
+    record_winner(high_winner, low_winner)
+
     game_msg("ANNOUNCE WINNERS")
     if high_winner:
         print(f"{high_winner} wins the high bet closest to 20.")
@@ -551,81 +433,92 @@ def determine_and_announce_winners():
     else:
         print("No low bet winner.")
 
-def game_round():
-        game_msg("GAME START. Please try your best and have fun!")
+def record_winner(high_winner, low_winner):
+    """Record the winners for the current game."""
+    # check if all players bet on the same thing
+#    if all(players[player]["high_low_bet"] == "high" for player in players):
+#        game_record.append((high_winner, low_winner))
+#    if all(players[player]["high_low_bet"] == "low" for player in players):
+#        game_record.append((high_winner, low_winner))
+    game_record.append((high_winner, low_winner))
 
-        deal_hidden_card()
-
-        # Dealing rounds
-        deal_round(players, round_number=1)
-        deal_round(players, round_number=2)
-        deal_round(players, round_number=3)
-
-        # Players work on equations
-        player_work_on_equations()
-
-        # Bots work on equations 
-        # Record their bets and equations
-        bots_work_on_equations_and_bet()
-
-        # Betting round
-        # Record players bets
-        player_betting_round()
-
-        # record players equations and 
-        # Determine winners
-        determine_and_announce_winners()
-        
-        game_msg("GAME OVER. Thank you for playing Equation Hi-Lo!")
-
-def game_round_coin():
-        game_msg("GAME START. Please try your best and have fun!")
-
-        deal_hidden_card()
-        
-  
-        game_msg("Coin system opening_round")
-        global coin_record
-        coin_record = coin_system.opening_round(players, coin_record)
-        coin_system.print_coins(coin_record)
-
-        # Dealing rounds
-        deal_round(players, round_number=1)
-        deal_round(players, round_number=2)
-        deal_round(players, round_number=3)
-
-        # Players work on equations
-        player_work_on_equations()
-
-        # Bots work on equations 
-        # Record their bets and equations
-        bots_work_on_equations_and_bet()
-
-        # Betting round
-        # Record players bets
-        player_betting_round()
-
-        # record players equations and 
-        # Determine winners
-        determine_and_announce_winners()
-        
-        game_msg("GAME Round Ends. Preparing Next Round!")
 
 # Main function to control the game flow
 def play_game():
+    global deck
+    deck = []
+    # Define deck with cards (numeric cards with types and operation cards)
+    numeric_cards = [(n, t) for n in range(11) for t in ["gold", "silver", "bronze", "dirt"]]  # Cards 0-10 with types
+    operation_cards = ['*', '√'] * 4  # 4 of each operation card
+
+    # Shuffle the deck
+    deck = numeric_cards + operation_cards
+    random.shuffle(deck)
+    print("Deck initialized with", len(deck), "cards")  # Debug message
     """Main function to control the game flow."""
-    # set up players, set up bots, set up coins if needed
     initial_setup()
     # print("Players set up:", players)
+
+    game_msg("GAME START. Please try your best and have fun!")
+
+    deal_hidden_card()
     
-    # if coin system is enabled, play until...
-    # otherwise, the game ends after one round
-    if coin_system_mode:
-        while(True):
-            game_round_coin()
-    else:
-        game_round()
+    # Dealing rounds
+    deal_round(players, round_number=1)
+    deal_round(players, round_number=2)
+    deal_round(players, round_number=3)
+
+    # Players work on equations
+    player_work_on_equations()
+
+    # Bots work on equations 
+    # Record their bets and equations
+    bots_work_on_equations_and_bet()
+
+    # Betting round
+    # Record players bets
+    player_betting_round()
+
+    # record players equations and 
+    # Determine winners
+    determine_and_announce_winners()
+    
+    game_msg("GAME OVER. Thank you for playing Equation Hi-Lo!")
+
+def count_winners():
+    """Count the number of wins for each player in the game record."""
+    # Flatten the game record and count the wins for each player, in the format of high_win_count, low_win_count for each player
+    win_counts = {}
+    for high_winner, low_winner in game_record:
+        if high_winner:
+            win_counts[high_winner] = win_counts.get(high_winner, (0, 0))
+            win_counts[high_winner] = (win_counts[high_winner][0] + 1, win_counts[high_winner][1])
+        if low_winner:
+            win_counts[low_winner] = win_counts.get(low_winner, (0, 0))
+            win_counts[low_winner] = (win_counts[low_winner][0], win_counts[low_winner][1] + 1)
+
+    return win_counts
+    
+
 
 if __name__ == "__main__":
+    
     print("Welcome to Equation Hi-Lo!")
-    play_game()
+    for i in range(num_games):
+        play_game()
+        print(f"\n\nGame {i+1}")
+    win_counts = count_winners()
+    print(win_counts)
+    # plot count winners
+    import matplotlib.pyplot as plt
+
+    plt.figure(figsize=(10, 6))
+    plt.bar(win_counts.keys(), [count[0] for count in win_counts.values()], color='b', label='High Wins')
+    plt.bar(win_counts.keys(), [count[1] for count in win_counts.values()], color='r', label='Low Wins', bottom=[count[0] for count in win_counts.values()])
+    plt.xlabel('Players')
+    plt.ylabel('Wins')
+    plt.title('Wins by Player')
+    plt.legend()
+    plt.show()
+
+
