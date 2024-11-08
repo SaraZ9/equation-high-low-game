@@ -48,5 +48,36 @@
    ```bash
    git clone https://github.com/your-username/equation-high-low-game.git
    cd equation-high-low-game
----
+
+2. Run the game
+```python main_game.py```
+
+3. Select Players and Start Game:
+You can follow the instruction on the terminal to add human players, bots, or a combination of both.
+
+## Adding Custom Bots
+
+Would you like to add your own custom bot to Equation Hi-Lo? It’s easy to create a bot that can automatically make decisions and compete with other players.
+
+### Use the Template:
+Start by copying `template_bot.py`, which provides the basic structure for creating a bot. Save your new bot file in the `/bots` folder.
+
+### Implement Core Functions
+Each bot requires three core functions:
+
+- **`welcome_msg()`**: Returns a brief message introducing your bot’s strategy to players.
+
+- **`decision_for_drop(bot_data)`**: Defines which operation to drop if the bot receives a `*` card. The `bot_data` dictionary provides the bot's current state, including available operations.
+
+- **`make_a_bet_and_equation(bot_data)`**: The main function where your bot will:
+  - Choose a bet (`high` or `low`).
+  - Form an equation using all number and operation cards exactly once.
+
+
+## Future Improvement
+
+This section provides an overview of active development efforts and future improvements planned for the Equation Hi-Lo Game.
+
+1. **Betting Coins Functionality**:
+   - Add betting mechanics with coins, enforce betting rules, and handle coin distribution based on the final results.
 
