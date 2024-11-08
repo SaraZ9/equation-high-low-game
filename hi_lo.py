@@ -229,10 +229,10 @@ def player_create_equation(player):
     operation_cards= players[player]["operation_cards"]
     
     print(f"\n{player}'s turn to create an equation!")
-    print(f"Hidden card: {players[player]["hidden_card"]}")
-    print(f"Open cards: {players[player]["open_cards"]}")
-    print(f"Operation cards: {players[player]["operation_cards"]}")
-    print(f"Bet: {players[player]["high_low_bet"]}")
+    print(f"Hidden card: {players[player]['hidden_card']}")
+    print(f"Open cards: {players[player]['open_cards']}")
+    print(f"Operation cards: {players[player]['operation_cards']}")
+    print(f"Bet: {players[player]['high_low_bet']}")
     
     # Prepare expected components
     all_numbers = [str(hidden_card[0])] + [str(card[0]) for card in open_cards]
@@ -284,16 +284,16 @@ def determine_winners():
     for player in players:
         if 'bot_type' in players[player]:
             print(f"\n{player}'s turn to create an equation!")
-            print(f"Hidden card: {players[player]["hidden_card"]}")
-            print(f"Open cards: {players[player]["open_cards"]}")
-            print(f"Operation cards: {players[player]["operation_cards"]}")
-            print(f"Bet: {players[player]["high_low_bet"]}")
+            print(f"Hidden card: {players[player]['hidden_card']}")
+            print(f"Open cards: {players[player]['open_cards']}")
+            print(f"Operation cards: {players[player]['operation_cards']}")
+            print(f"Bet: {players[player]['high_low_bet']}")
 
             if check_bot_valid_equation(players[player]):
                 result = evaluate_equation(players[player]["equation"])
-                print(f"{player}'s equation: {players[player]["equation"]}, result: {result}")
+                print(f"{player}'s equation: {players[player]['equation']}, result: {result}")
             else:
-                print(f"{player}'s equation: {players[player]["equation"]}")
+                print(f"{player}'s equation: {players[player]['equation']}")
                 result = None
                 players[player]["high_low_bet"] = None
                 print(f"{player}'s equation is not valid. This bot is eliminated.")
@@ -329,7 +329,7 @@ def determine_winners():
         valid_low_bets = {player: result for player, result in low_bets.items() if result is not None and result != float('inf')}
 
         if valid_low_bets:
-            low_winner = min(valid_low_bets, key=lambda x: abs(20 - valid_low_bets[x]))
+            low_winner = min(valid_low_bets, key=lambda x: abs(1 - valid_low_bets[x]))
         else:
             print("No valid low bets, so no low winner this round.")
     else:
@@ -352,7 +352,7 @@ def player_betting_round():
                     break
                 print("Invalid choice. Please enter 'high' or 'low'.")
         else:
-            print(f"{player} bet on {players[player]["high_low_bet"]}.")
+            print(f"{player} bet on {players[player]['high_low_bet']}.")
 
 def deal_round(players, round_number):
     """Deal cards to each player for a specific round."""
@@ -422,6 +422,7 @@ def player_work_on_equations():
 def determine_and_announce_winners():
     """Determine and announce winners for high and low bets."""
     game_msg("DETERMINING WINNERS")
+    
 
     high_winner, low_winner = determine_winners()
     
