@@ -80,5 +80,4 @@ This section provides an overview of active development efforts and future impro
 
 1. **Betting Coins Functionality**:
    - Add betting mechanics with coins, enforce betting rules, and handle coin distribution based on the final results.
----
 
