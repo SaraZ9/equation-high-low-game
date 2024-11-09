@@ -188,11 +188,19 @@ def handle_bet(player, coin_record, amount, dealer_coin):
 #     player['bet'] = 0
 
 def distribute_coin(high_winner, low_winner,dealer_coin, coin_record):
-    dealer_coin = int(dealer_coin/2)
-    coin_record[high_winner]['coins'] = dealer_coin
-    coin_record[low_winner]['coins'] = dealer_coin
-    dealer_coin = 0
-    return coin_record
+    half_coin = int(dealer_coin/2)
+    if high_winner != None and low_winner != None:
+        coin_record[high_winner]['coins'] += half_coin
+        coin_record[low_winner]['coins'] += half_coin 
+        dealer_coin = 0
+    elif high_winner == None:
+        coin_record[low_winner]['coins'] += dealer_coin
+        dealer_coin = 0
+    else:
+        coin_record[high_winner]['coins'] += dealer_coin
+        dealer_coin = 0
+
+    return coin_record, dealer_coin
 
 
 

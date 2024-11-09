@@ -682,7 +682,7 @@ def game_round_coin():
         # record players equations and 
         # Determine winners
         high_winner, low_winner = determine_and_announce_winners()
-        coin_record = coin_system.distribute_coin(high_winner, low_winner,dealer_coin, coin_record)
+        coin_record, dealer_coin = coin_system.distribute_coin(high_winner, low_winner,dealer_coin, coin_record)
         
         game_msg("GAME Round Ends. Preparing Next Round!")
 
