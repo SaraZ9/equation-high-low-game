@@ -1,0 +1,32 @@
+[
+    {
+        "random_bot_bet_1": {
+            "coins": 38,
+            "active": true
+        },
+        "random_bot_bet_2": {
+            "coins": -2,
+            "active": false
+        }
+    },
+    {
+        "random_bot_bet_1": {
+            "coins": 38,
+            "active": true
+        },
+        "random_bot_bet_2": {
+            "coins": -2,
+            "active": false
+        }
+    },
+    {
+        "random_bot_bet_1": {
+            "coins": 38,
+            "active": true
+        },
+        "random_bot_bet_2": {
+            "coins": -2,
+            "active": false
+        }
+    }
+]

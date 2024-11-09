@@ -87,7 +87,22 @@ def prepare_player_before_game_round(players, players_coins):
     return players_coins
 
 def check_active_player(player, players_coins):
-    return players_coins[player]['active'] and players_coins[player]['coins'] > 0
+    #  and players_coins[player]['coins'] > 0
+    return players_coins[player]['active']
+
+def need_end_round(players_coins):
+    # need to end betting round if only one active player,
+    # or all active player have only 0 coins
+    
+    return only_one_active_player_left(players_coins) or all_active_players_0_coins(players_coins)
+
+def all_active_players_0_coins(players_coins):
+    for player in players_coins:
+        if players_coins[player]['active']:
+            if players_coins[player]['coins'] > 0:
+                return False
+            
+    return True
 
 def opening_round(players, players_coins, dealer_coin):
     for player in players_coins:
@@ -186,19 +201,31 @@ def handle_bet(player, coin_record, amount, dealer_coin):
 # def reset_player_bet(player):
 #     """Reset any bet a player has made, if needed."""
 #     player['bet'] = 0
-def only_one_player_left(coin_record):
+# def only_one_player_left(coin_record):
+#     count = 0
+#     for player in coin_record:
+#         if coin_record[player]['coins'] > 0:
+#             count += 1
+#     return count <= 1
+
+def get_count_active(coin_record):
     count = 0
     for player in coin_record:
-        if coin_record[player]['coins'] > 0:
+        if coin_record[player]['active']:
             count += 1
-    return count <= 1
+    return count
+
+def get_the_only_active(coin_record):
+    for player in coin_record:
+        if coin_record[player]['active']:
+            return player
+    return ""
 
 def only_one_active_player_left(coin_record):
     count = 0
     for player in coin_record:
-        if coin_record[player]['coins'] > 0:
-            if coin_record[player]['active']:
-                count += 1
+        if coin_record[player]['active']:
+            count += 1
     return count <= 1
 
 def distribute_coin(high_winner, low_winner,dealer_coin, coin_record):

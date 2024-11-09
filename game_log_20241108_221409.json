@@ -1,0 +1,80 @@
+[
+    {
+        "random_bot_bet_1": {
+            "coins": -2,
+            "active": false
+        },
+        "random_bot_bet_2": {
+            "coins": -2,
+            "active": false
+        },
+        "random_bot_bet_3": {
+            "coins": -2,
+            "active": false
+        },
+        "random_bot_bet_4": {
+            "coins": 119,
+            "active": false
+        },
+        "random_bot_bet_5": {
+            "coins": 7,
+            "active": true
+        },
+        "random_bot_bet_6": {
+            "coins": 0,
+            "active": true
+        }
+    },
+    {
+        "random_bot_bet_1": {
+            "coins": -2,
+            "active": false
+        },
+        "random_bot_bet_2": {
+            "coins": -2,
+            "active": false
+        },
+        "random_bot_bet_3": {
+            "coins": -2,
+            "active": false
+        },
+        "random_bot_bet_4": {
+            "coins": 119,
+            "active": false
+        },
+        "random_bot_bet_5": {
+            "coins": 7,
+            "active": true
+        },
+        "random_bot_bet_6": {
+            "coins": 0,
+            "active": true
+        }
+    },
+    {
+        "random_bot_bet_1": {
+            "coins": -2,
+            "active": false
+        },
+        "random_bot_bet_2": {
+            "coins": -2,
+            "active": false
+        },
+        "random_bot_bet_3": {
+            "coins": -2,
+            "active": false
+        },
+        "random_bot_bet_4": {
+            "coins": 119,
+            "active": false
+        },
+        "random_bot_bet_5": {
+            "coins": 7,
+            "active": true
+        },
+        "random_bot_bet_6": {
+            "coins": 0,
+            "active": true
+        }
+    }
+]
