@@ -315,32 +315,62 @@ def determine_winners():
     print(" - Use 'v' for square root, applied to the next number (e.g., 'v 9' for √9).")
 
     for player in players:
-        if 'bot_type' in players[player]:
-            print(f"\n{player}'s turn to create an equation!")
-            print(f"Hidden card: {players[player]['hidden_card']}")
-            print(f"Open cards: {players[player]['open_cards']}")
-            print(f"Operation cards: {players[player]['operation_cards']}")
-            print(f"Bet: {players[player]['high_low_bet']}")
+        if coin_system_mode:
+            if coin_system.check_active_player(player,coin_record):
+                if 'bot_type' in players[player]:
+                    print(f"\n{player}'s turn to create an equation!")
+                    print(f"Hidden card: {players[player]['hidden_card']}")
+                    print(f"Open cards: {players[player]['open_cards']}")
+                    print(f"Operation cards: {players[player]['operation_cards']}")
+                    print(f"Bet: {players[player]['high_low_bet']}")
 
-            if check_bot_valid_equation(players[player]):
-                result = evaluate_equation(players[player]["equation"])
-                print(f"{player}'s equation: {players[player]['equation']}, result: {result}")
-            else:
-                print(f"{player}'s equation: {players[player]['equation']}")
-                result = None
-                players[player]["high_low_bet"] = None
-                print(f"{player}'s equation is not valid. This bot is eliminated.")
-                print("Congrats, everyone else! One less competitor.")
+                    if check_bot_valid_equation(players[player]):
+                        result = evaluate_equation(players[player]["equation"])
+                        print(f"{player}'s equation: {players[player]['equation']}, result: {result}")
+                    else:
+                        print(f"{player}'s equation: {players[player]['equation']}")
+                        result = None
+                        players[player]["high_low_bet"] = None
+                        print(f"{player}'s equation is not valid. This bot is eliminated.")
+                        print("Congrats, everyone else! One less competitor.")
+                else:
+                    equation, result = player_create_equation(player)
+                    # equation, result = player_create_equation(players[player]['hidden_card'], players[player]['open_cards'], players[player]['operation_cards'])
+                    print(f"{player}'s equation: {equation}, result: {result}")
+
+                # Sort players into high or low bets based on their choice
+                if players[player]["high_low_bet"]== "high":
+                    high_bets[player] = result
+                elif players[player]["high_low_bet"] == "low":
+                    low_bets[player] = result
         else:
-            equation, result = player_create_equation(player)
-            # equation, result = player_create_equation(players[player]['hidden_card'], players[player]['open_cards'], players[player]['operation_cards'])
-            print(f"{player}'s equation: {equation}, result: {result}")
+        
+            if 'bot_type' in players[player]:
+                print(f"\n{player}'s turn to create an equation!")
+                print(f"Hidden card: {players[player]['hidden_card']}")
+                print(f"Open cards: {players[player]['open_cards']}")
+                print(f"Operation cards: {players[player]['operation_cards']}")
+                print(f"Bet: {players[player]['high_low_bet']}")
 
-        # Sort players into high or low bets based on their choice
-        if players[player]["high_low_bet"]== "high":
-            high_bets[player] = result
-        elif players[player]["high_low_bet"] == "low":
-            low_bets[player] = result
+                if check_bot_valid_equation(players[player]):
+                    result = evaluate_equation(players[player]["equation"])
+                    print(f"{player}'s equation: {players[player]['equation']}, result: {result}")
+                else:
+                    print(f"{player}'s equation: {players[player]['equation']}")
+                    result = None
+                    players[player]["high_low_bet"] = None
+                    print(f"{player}'s equation is not valid. This bot is eliminated.")
+                    print("Congrats, everyone else! One less competitor.")
+            else:
+                equation, result = player_create_equation(player)
+                # equation, result = player_create_equation(players[player]['hidden_card'], players[player]['open_cards'], players[player]['operation_cards'])
+                print(f"{player}'s equation: {equation}, result: {result}")
+
+            # Sort players into high or low bets based on their choice
+            if players[player]["high_low_bet"]== "high":
+                high_bets[player] = result
+            elif players[player]["high_low_bet"] == "low":
+                low_bets[player] = result
 
     # Determine the winners for high and low bets
     high_winner, low_winner = None, None
@@ -375,7 +405,6 @@ def player_betting_round():
     game_msg("BETTING ROUND")
     input("\nPlease place your bet coins on the table now. Press Enter when all players finish.")
 
-
     for player in players:
         if coin_system_mode:
             if coin_system.check_active_player(player, coin_record):
@@ -388,6 +417,16 @@ def player_betting_round():
                         print("Invalid choice. Please enter 'high' or 'low'.")
                 else:
                     print(f"{player} bet on {players[player]['high_low_bet']}.")
+        else:
+            if 'bot_type' not in players[player]:
+                while True:
+                    bet = input(f"{player}, are you betting 'high' or 'low'?: ").lower()
+                    if bet in ["high", "low"]:
+                        players[player]["high_low_bet"] = bet
+                        break
+                    print("Invalid choice. Please enter 'high' or 'low'.")
+            else:
+                print(f"{player} bet on {players[player]['high_low_bet']}.")
             
 
 
