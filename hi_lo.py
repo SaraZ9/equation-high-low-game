@@ -1,3 +1,5 @@
+import datetime
+import json
 import random
 import math
 import time
@@ -8,7 +10,15 @@ import importlib
 import os
 import re
 import coin_system
+from datetime import datetime
 
+game_log = []
+bots = {}
+players = {}
+coin_record = {}
+coin_record_history = {}
+coin_system_mode = False
+dealer_coin = 0
 # Define deck with cards (numeric cards with types and operation cards)
 numeric_cards = [(n, t) for n in range(11) for t in ["gold", "silver", "bronze", "dirt"]]  # Cards 0-10 with types
 operation_cards = ['*', '√'] * 4  # 4 of each operation card
@@ -18,12 +28,12 @@ deck = numeric_cards + operation_cards
 random.shuffle(deck)
 print("Deck initialized with", len(deck), "cards")  # Debug message
 
-# bots and players set up
-bots = {}
-players = {}
-coin_record = {}
-coin_system_mode = False
-dealer_coin = 0
+def init_param():
+    # Shuffle the deck
+    global deck
+    deck = numeric_cards + operation_cards
+    random.shuffle(deck)
+    print("Deck initialized with", len(deck), "cards")  # Debug message
 
 def load_bots():
     """Dynamically load all bot modules from the bots/ directory."""
@@ -82,6 +92,7 @@ def init_coin_system(players):
 
 
 def initial_setup():
+    init_param()
     global players, bots 
     """Set up the game: define players and assign each a hidden card."""
     game_msg("WELCOME TO EQUATION HI-LO SETUP")
@@ -446,70 +457,83 @@ def first_betting_round():
     print(bet_record)
     
     while(not coin_system.betting_matched(bet_record)):
-        for player in players:
-            if(coin_system.betting_matched(bet_record)):
-                break
-            if coin_system.check_active_player(player, coin_record):
-                possible_choices = coin_system.calculate_possible_choices(player, bet_placed, current_bet,coin_record,bet_record)
-                
-                # Check if player is a bot or a human
-                if 'bot_type' in players[player]:
-                    # Call the bot's betting function from coin_system
-                    bot_data = players[player]
-                    bot_type = players[player]['bot_type']
-                    bot_module = bots.get(bot_type)
-                    bot_choice = bot_module.first_betting(bot_data, coin_record, possible_choices)
+        if coin_system.only_one_active_player_left(coin_record):
+            print("@@@ DEBUG 1 ")
+            print("@@@ DEBUG coin_record is ")
+            print(coin_record)
+            print("@@@ DEBUG bet_record is ")
+            print(bet_record)
+            break
+        else:
+            for player in players:
+                print("@@@ DEBUG 2 ")
+                print("@@@ DEBUG coin_record is ")
+                print(coin_record)
+                print("@@@ DEBUG bet_record is ")
+                print(bet_record)
+                if(coin_system.betting_matched(bet_record)):
+                    break
+                if coin_system.check_active_player(player, coin_record):
+                    possible_choices = coin_system.calculate_possible_choices(player, bet_placed, current_bet,coin_record,bet_record)
                     
-                    if not check_valid_choice(bot_choice, possible_choices):
-                        print(f"{player}'s move is illegal. Therefore the system chose fold for them.")
-                        bet_record, coin_record = coin_system.inactive_player(player, coin_record, bet_record)
-                    else:
-                        print(f"{player} has made their move: {bot_choice}.")
-                        bet_record = coin_system.update_bet_record(player, bot_choice, bet_record)
-
-                        if bot_choice == "pass":
-                            ""
-                        elif bot_choice == "fold":
+                    # Check if player is a bot or a human
+                    if 'bot_type' in players[player]:
+                        # Call the bot's betting function from coin_system
+                        bot_data = players[player]
+                        bot_type = players[player]['bot_type']
+                        bot_module = bots.get(bot_type)
+                        bot_choice = bot_module.first_betting(bot_data, coin_record, possible_choices)
+                        
+                        if not check_valid_choice(bot_choice, possible_choices):
+                            print(f"{player}'s move is illegal. Therefore the system chose fold for them.")
                             bet_record, coin_record = coin_system.inactive_player(player, coin_record, bet_record)
                         else:
-                            coin_record, dealer_coin = coin_system.handle_bet(player, coin_record, bot_choice, dealer_coin)
-                            bet_placed = True
-                            # current_bet = bot_choice 
-                            current_bet = coin_system.get_current_bet(bet_record)
-                else:
-                    # Display choices to the human player
-                    print(f"\n{player}, you have {coin_record[player]} coins.")
-                    print(f"Current bet is {current_bet}. Your options: {', '.join(map(str, possible_choices))}")
-                    
-                    # Get player's decision
-                    while True:
-                        choice = input(f"{player}, what do you want to do? ").strip().lower()
-                        
-                        # Attempt to convert choice to an integer if it's a number
-                        try:
-                            choice = int(choice)
-                        except ValueError:
-                            # If conversion fails, choice remains a lowercase string
-                            pass
+                            print(f"{player} has made their move: {bot_choice}.")
+                            bet_record = coin_system.update_bet_record(player, bot_choice, bet_record)
 
-
-                        if not check_valid_choice(choice, possible_choices):
-                            print("Invalid choice. Please choose from the available options.")
-                            continue
-                        else:
-                            print(f"{player} has made their move: {choice}.")
-                            bet_record = coin_system.update_bet_record(player, choice, bet_record)
-
-                            if choice == "pass":
+                            if bot_choice == "pass":
                                 ""
-                            elif choice == "fold":
+                            elif bot_choice == "fold":
                                 bet_record, coin_record = coin_system.inactive_player(player, coin_record, bet_record)
                             else:
-                                coin_record, dealer_coin = coin_system.handle_bet(player, coin_record, choice, dealer_coin)
+                                coin_record, dealer_coin = coin_system.handle_bet(player, coin_record, bot_choice, dealer_coin)
                                 bet_placed = True
-                                # current_bet = choice
+                                # current_bet = bot_choice 
                                 current_bet = coin_system.get_current_bet(bet_record)
-                            break
+                    else:
+                        # Display choices to the human player
+                        print(f"\n{player}, you have {coin_record[player]} coins.")
+                        print(f"Current bet is {current_bet}. Your options: {', '.join(map(str, possible_choices))}")
+                        
+                        # Get player's decision
+                        while True:
+                            choice = input(f"{player}, what do you want to do? ").strip().lower()
+                            
+                            # Attempt to convert choice to an integer if it's a number
+                            try:
+                                choice = int(choice)
+                            except ValueError:
+                                # If conversion fails, choice remains a lowercase string
+                                pass
+
+
+                            if not check_valid_choice(choice, possible_choices):
+                                print("Invalid choice. Please choose from the available options.")
+                                continue
+                            else:
+                                print(f"{player} has made their move: {choice}.")
+                                bet_record = coin_system.update_bet_record(player, choice, bet_record)
+
+                                if choice == "pass":
+                                    ""
+                                elif choice == "fold":
+                                    bet_record, coin_record = coin_system.inactive_player(player, coin_record, bet_record)
+                                else:
+                                    coin_record, dealer_coin = coin_system.handle_bet(player, coin_record, choice, dealer_coin)
+                                    bet_placed = True
+                                    # current_bet = choice
+                                    current_bet = coin_system.get_current_bet(bet_record)
+                                break
 
     print("\nBetting round completed.")
 
@@ -693,13 +717,30 @@ def play_game():
     # set up players, set up bots, set up coins if needed
     initial_setup()
     
+    global coin_record_history
     # if coin system is enabled, play 3 rounds
     # otherwise, the game ends after one round
     if coin_system_mode:
-        for i in range(1):
+        for i in range(3):
+        # i = 0
+        # while(not coin_system.only_one_player_left(coin_record)):
+            last_coin_record = coin_record.copy() 
             game_round_coin()
-        game_msg("game ended>>>>>>> final result :")
-        coin_system.print_coins(coin_record)
+
+            current_coin_record = coin_record.copy()
+
+            game_msg(f"Round {i} of game ended.")
+            game_log.append(current_coin_record)
+            coin_system.print_coins(last_coin_record)
+            coin_system.print_coins(current_coin_record)
+            # i += 1
+        # Get the current time and format it for the filename
+        current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"game_log_{current_time}.json"
+
+        # Save game log to a file with the timestamped filename
+        with open(filename, "w") as log_file:
+            json.dump(game_log, log_file, indent=4)  # Write in JSON format with indentation for readability
     else:
         game_round()
 

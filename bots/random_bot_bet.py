@@ -73,15 +73,15 @@ def first_betting(bot_data, players_coins, possible_choices):
     # bot will know the bot_data, and all players coin status, and what options they have
     # decision can be from the possible_choices:
     # pass, match, raise (will be told how many coind can be), fold
-    
-    decision = ""
+    decision = random.choice(possible_choices)
     return decision
+
 def second_betting(bot_data, players_coins, possible_choices):
     # bot will know the bot_data, and all players coin status, and what options they have
     # decision can be from the possible_choices:
     # pass, match, raise (will be told how many coind can be), fold
     
-    decision = ""
+    decision = random.choice(possible_choices)
     return decision
 
 # Example usage
